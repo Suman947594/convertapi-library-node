@@ -1,0 +1,70 @@
+import random
+import time
+
+class GameOwner:
+    def __init__(self):
+        self.vips = {}
+
+    # Function to determine the crash point (admin-controlled)
+    def determine_crash_point(self):
+        return random.uniform(2.0, 1000.0)  # Crash point between 2x and 1000x
+
+    def activate_vip(self, player_id, deposit_amount):
+        if deposit_amount >= 200:
+            self.vips[player_id] = {
+                'status': 'VIP',
+                'activation_date': time.time(),  # Timestamp of activation
+                'bonus_received': False,
+                'withdrawal_limit': 10000  # Maximum daily withdrawal for VIPs
+            }
+            print(f"Player {player_id} activated VIP status!")
+        else:
+            print("Deposit must be ₹200 or more to activate VIP status.")
+
+    def get_vip_benefits(self, player_id):
+        vip_data = self.vips.get(player_id, None)
+        if vip_data and vip_data['status'] == 'VIP':
+            current_time = time.time()
+            # Check if it's time for a 15-day bonus
+            if (current_time - vip_data['activation_date']) // (15 * 86400) > 0 and not vip_data['bonus_received']:
+                vip_data['bonus_received'] = True
+                print("₹20 bonus granted to VIP player!")
+            return vip_data
+        return None
+
+    def process_withdrawal(self, player_id, withdrawal_amount):
+        vip_data = self.vips.get(player_id, None)
+        if vip_data and vip_data['status'] == 'VIP':
+            if withdrawal_amount >= 100 and withdrawal_amount <= vip_data['withdrawal_limit']:
+                print(f"Player {player_id} withdrew ₹{withdrawal_amount}.")
+            else:
+                print(f"Invalid withdrawal amount for VIP player {player_id}. Must be between ₹100 and ₹{vip_data['withdrawal_limit']}.")
+        else:
+            print(f"Player {player_id} is not VIP. Cannot withdraw.")
+    
+    # Countdown for game start
+    def start_game_countdown(self, countdown_time=10):
+        print("Game will start in:")
+        for i in range(countdown_time, 0, -1):
+            print(i)
+            time.sleep(1)
+        print("Game Started!")
+
+# Example Usage
+game_owner = GameOwner()
+
+# Start game countdown of 10 seconds
+game_owner.start_game_countdown()
+
+# Player 1 deposits ₹200 to activate VIP status
+game_owner.activate_vip("player1", 200)
+
+# Check VIP benefits
+vip_benefits = game_owner.get_vip_benefits("player1")
+
+# Process withdrawal
+game_owner.process_withdrawal("player1", 5000)
+
+# Admin determines crash point
+crash_point = game_owner.determine_crash_point()
+print(f"Game crash point: {crash_point:.2f}x")
